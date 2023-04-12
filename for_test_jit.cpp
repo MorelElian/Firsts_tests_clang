@@ -2,8 +2,8 @@
 #include <chrono>
 #include <fstream>
 using namespace std;
-template <typename T>
-[[clang::jit]]double test_boucle(int size)
+template <typename T,int size>
+[[clang::jit]]double test_boucle()
 {
     float j = 2.0;
     
@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
 {
     
     int size = std::atoi(argv[1]);
-    double result = test_boucle<int>(size);
+    double result = test_boucle<int,size>();
     
     std::ofstream csv_file("test_boucle.csv", std::ios::app);
     
