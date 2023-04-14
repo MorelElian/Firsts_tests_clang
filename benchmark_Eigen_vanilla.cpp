@@ -33,7 +33,7 @@ using namespace Eigen;
 } */
 
 template <int size>
-[[clang::jit]]void benchmark(int repeat)
+[[clang::jit]]double benchmark(int repeat)
 {
     Eigen::Matrix<double,size,size> mat,tmp_mul;
     for(int i = 0 ;i < size; i++)
@@ -42,7 +42,7 @@ template <int size>
         {
             mat(i,j) = i * size + j;
         }}
-    
+    auto start = chrono::system_clock::now();
     for(int l = 0; l< repeat; l++)
     {
         Eigen::Matrix<double,size,size> tmp;
@@ -56,15 +56,14 @@ template <int size>
         }
         mat  = Eigen::Matrix<double,size,size>::Ones() + int(0.00005) * (mat+ tmp_mul);
     }
-    
+    auto end = chrono::system_clock::now();
+    return chrono::duration<double>(end - start).count();
 }
 
 double call_template(int size,int repeat)
 {
-    auto start = chrono::system_clock::now();
-    benchmark<size>(repeat);
-    auto end = chrono::system_clock::now();
-    double result = chrono::duration<double>(end - start).count();
+    
+    double result = benchmark<size>(repeat);
     return result;
 }
 int main(int arcg, char * argv[])
@@ -73,9 +72,9 @@ int main(int arcg, char * argv[])
     int repeat = std::atoi(argv[2]);
     double result = call_template(size,repeat);
     std::ofstream csv_file("Eigen_bm_jit.csv", std::ios::app);
-    
+    cle
     // Ecriture de la première colonne
-    csv_file << "for_test_jit;" <<size <<";";
+    csv_file << "eigen_vanilla_jit;" <<size <<";";
     
     // Ecriture de la deuxième colonne avec la valeur de la variable x
     

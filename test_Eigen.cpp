@@ -11,13 +11,14 @@ using namespace Eigen;
 template<int size>
 [[clang::jit]]void test()
 {
- Matrix<int,size,size> mat;
+ Matrix<double,size,size> mat;
  for(int i = 0 ; i <size; i++)
  {
     for (int j = 0 ; j< size ; j++)
     {
     mat(i,j) = 2;
  }}
+ mat = mat * mat;
 
 
 }
