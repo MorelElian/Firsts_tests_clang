@@ -3,10 +3,10 @@ CXX=clang++
 
 EIGENDIR=$(HOME)/eigen-3.4.0/install/
 
-CXXFLAGS=-fjit -I$(EIGENDIR)/include/eigen3
-LDFLAGS=-fjit
+CXXFLAGS=-fjit -I$(EIGENDIR)/include/eigen3 -O3 -g
+LDFLAGS=-fjit -g
 
-EXEC=Eigen_test_jit Eigen_test for_test_jit hello_world_jit
+EXEC=Eigen_test_jit Eigen_test for_test_jit hello_world_jit matmul
 
 all: $(EXEC)
 
@@ -20,6 +20,9 @@ for_test_jit: for_test_jit.o
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
 hello_world_jit: hello_world_jit.o
+	$(CXX) -o $@ $^ $(LDFLAGS)
+
+matmul: matmul.o
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
 %.o: %.cpp
