@@ -2,18 +2,28 @@
 #include <iomanip>
 #include <cstdlib>
 #include <x86intrin.h>
-
+#include <papi.h>
+#include <fstream>
 #define DEFAULTM 16
 #define DEFAULTN 16
 #define DEFAULTK 16
-#define NBREP    100
-
+#define NBREP    1
+#define LEN_VALUES 3
 template <typename T> void initRand( T**, int, int );
 template <typename T> void printMatrix( T**, int, int );
-
+void write_csv(std::string  type,long long * values,int N, int M, int K);
+using namespace std;
 /* C <- A*B + C */
 template <typename T, int M, int N, int K>
-[[clang::jit]] void matmult( T** C, T** A, T** B ){
+[[clang::jit]] void matmult( T** C, T** A, T** B ){ 
+  int retval = PAPI_library_init(PAPI_VER_CURRENT);
+  int EventSet = PAPI_NULL;
+  long long values[3];
+  PAPI_create_eventset(&EventSet);
+  PAPI_add_event(EventSet,PAPI_TOT_CYC);
+  PAPI_add_event(EventSet,PAPI_L1_DCM);
+  PAPI_add_event(EventSet,PAPI_TOT_INS);
+  PAPI_start(EventSet);
   for( auto i = 0 ; i < M ; i++ ){
     for( auto k = 0 ; k < K ; k++ ){
       for( auto j = 0 ; j < N ; j++ ){
@@ -21,10 +31,22 @@ template <typename T, int M, int N, int K>
       }
     }
   }
+
+  PAPI_stop(EventSet,values);
+  write_csv("JIT_1",values,N,M,K);
 }
 
 template <typename T, int M, int N, int K>
 [[clang::jit]] void matmult1( T** C, T** A, T** B ){
+  
+  long long values[3];
+  int EventSet = PAPI_NULL;
+  PAPI_create_eventset(&EventSet);
+  PAPI_add_event(EventSet,PAPI_TOT_CYC);
+  PAPI_add_event(EventSet,PAPI_L1_DCM);
+  PAPI_add_event(EventSet,PAPI_TOT_INS);
+  PAPI_start(EventSet);
+
   for( auto i = 0 ; i < M ; i++ ){
     for( auto j = 0 ; j < N ; j++ ){
       //#pragma clang loop unroll(full)
@@ -35,10 +57,20 @@ template <typename T, int M, int N, int K>
       }
     }
   }
+  PAPI_stop(EventSet,values);
+  write_csv("JIT_2",values,N,M,K);
 }
 
 template <typename T>
 void matmult2( T** C, T** A, T** B, int M, int N, int K ){
+  int retval = PAPI_library_init(PAPI_VER_CURRENT);
+  int EventSet = PAPI_NULL;
+  long long values[3];
+  PAPI_create_eventset(&EventSet);
+  PAPI_add_event(EventSet,PAPI_TOT_CYC);
+  PAPI_add_event(EventSet,PAPI_L1_DCM);
+  PAPI_add_event(EventSet,PAPI_TOT_INS);
+  PAPI_start(EventSet);
   for( auto i = 0 ; i < M ; i++ ){
     for( auto k = 0 ; k < K ; k++ ){
       for( auto j = 0 ; j < N ; j++ ){
@@ -46,10 +78,20 @@ void matmult2( T** C, T** A, T** B, int M, int N, int K ){
       }
     }
   }
+  PAPI_stop(EventSet,values);
+  write_csv("NOJIT_1",values,N,M,K);
 }
 
 template <typename T>
 void matmult3( T** C, T** A, T** B, int M, int N, int K ){
+  int retval = PAPI_library_init(PAPI_VER_CURRENT);
+  int EventSet = PAPI_NULL;
+  long long values[3];
+  PAPI_create_eventset(&EventSet);
+  PAPI_add_event(EventSet,PAPI_TOT_CYC);
+  PAPI_add_event(EventSet,PAPI_L1_DCM);
+  PAPI_add_event(EventSet,PAPI_TOT_INS);
+  PAPI_start(EventSet);
   for( auto i = 0 ; i < M ; i++ ){
     for( auto j = 0 ; j < N ; j++ ){
       for( auto k = 0 ; k < K ; k++ ){
@@ -57,6 +99,8 @@ void matmult3( T** C, T** A, T** B, int M, int N, int K ){
       }
     }
   }
+  PAPI_stop(EventSet,values);
+  write_csv("NOJIT_2",values,N,M,K);
 }
 
 int main( int argc, char** argv ){
@@ -81,6 +125,7 @@ int main( int argc, char** argv ){
   double** C = new double*[M];
   for( auto i = 0 ; i < M ; i++ ) C[i] = new double[K];
 
+   int retval = PAPI_library_init(PAPI_VER_CURRENT);
   srand( 0 );
   initRand( A, M, N );
   initRand( B, N, K );
@@ -165,4 +210,14 @@ void printMatrix( T** mat, int lines, int cols ){
     }
     std::cout << std::endl;
   }
+}
+void write_csv(std::string  type,long long* values,int N,int M,int K)
+{
+	std::ofstream csv_file("matmul_results_2.csv",std::ios::app);
+	csv_file << type <<";" << N <<";" << M <<";" << K<<  ";"  ;
+	for( auto i = 0 ; i < LEN_VALUES ; i++)
+	{
+		csv_file << values[i] << ";"; 
+	}
+	csv_file << "\n";
 }
