@@ -1,8 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <papi.h>
+#include <fstream>
 template<int size,int epsilon>
-[[clang::jit]] sft_pip()
+[[clang::jit]] void sft_pip()
 {
     int a[size],b[size],c[size];
     for(int i = 0 ; i < size; i++)
@@ -32,7 +33,8 @@ template<int size,int epsilon>
                
                if(epsilon >  6)
                {
-               b[i+3] = a[i +3] * 3 - 2; 
+               b[i+3] = a[i +3] * 3 - 2;
+               a[i]++;
                }
                }
             }
@@ -40,10 +42,10 @@ template<int size,int epsilon>
         }
     }
     PAPI_stop(EventSet,values);
-    printf("JIT TOT_CYC : %lld L1_DCM : %lld  TOT_INS : %lld", values[0], values[1], values[2]);
+    printf("JIT TOT_CYC : %lld L1_DCM : %lld  TOT_INS : %lld \n", values[0], values[1], values[2]);
 }
 template<typename t>
-sft_pip(int size,int epsilon)
+void sft_pip(int size,int epsilon)
 {
     int a[size],b[size],c[size];
     for(int i = 0 ; i < size; i++)
@@ -62,18 +64,18 @@ sft_pip(int size,int epsilon)
     {
         for (int i = 0 ; i <size - 4; i ++)
         {
-            b[i] = a[i] *2 + 4;
-            
+            b[i] = a[i] *2 +3;
             if(epsilon > 4)
             {
                b[i+1] = a[i +1] * 3 - 2; 
                if(epsilon > 5)
                {
-               b[i+2] = a[i +2] * 3 - 2; 
-               
+               b[i+2] = a[i +2] * 3 - 2;  
                if(epsilon >  6)
                {
-               b[i+3] = a[i +3] * 3 - 2; 
+               b[i+3] = a[i +3] * 3 - 2;
+               a[i] ++;
+               
                }
                }
             }
@@ -81,11 +83,11 @@ sft_pip(int size,int epsilon)
         }
     }
     PAPI_stop(EventSet,values);
-    printf("JIT TOT_CYC : %lld L1_DCM : %lld  TOT_INS : %lld", values[0], values[1], values[2]);
+    printf("NOJIT TOT_CYC : %lld L1_DCM : %lld  TOT_INS : %lld \n", values[0], values[1], values[2]);
 }
 int main(int argc, char * argv[])
 {
-    int size = std::atoi(argv[1]), espilon = std::atoi(argv[2]);
+    int size = std::atoi(argv[1]), epsilon = std::atoi(argv[2]);
     sft_pip<int>(size,epsilon);
     sft_pip<int>(size,epsilon);
     sft_pip<size,epsilon>();
