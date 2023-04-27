@@ -2,6 +2,7 @@
 #include <vector>
 #include <papi.h>
 #include <fstream>
+#define LEN_VALUES 3
 template<int size,int epsilon>
 [[clang::jit]] void sft_pip()
 {
@@ -20,21 +21,23 @@ template<int size,int epsilon>
     PAPI_start(EventSet);
     for(int j = 0 ; j <30000;j++)
     {
-        for (int i = 0 ; i <size - 4; i ++)
+        for (int i = 0 ; i <size - 4; i+=4)
         {
             b[i] = a[i] *2 + 4;
-            
+            a[i]++;
             if(epsilon > 4)
             {
-               b[i+1] = a[i +1] * 3 - 2; 
+               b[i+1] = a[i +1] * 3 - 2;
+               a[i+1]++; 
                if(epsilon > 5)
                {
                b[i+2] = a[i +2] * 3 - 2; 
-               
+               a[i+2]++;
                if(epsilon >  6)
                {
                b[i+3] = a[i +3] * 3 - 2;
-               a[i]++;
+               a[i+3]++;
+	       
                }
                }
             }
@@ -43,7 +46,7 @@ template<int size,int epsilon>
     }
     PAPI_stop(EventSet,values);
     printf("JIT TOT_CYC : %lld L1_DCM : %lld  TOT_INS : %lld \n", values[0], values[1], values[2]);
-    std::ofstream csv_file("software_pipeling.csv",std::ios::app);
+    std::ofstream csv_file("software_pipelining.csv",std::ios::app);
 	csv_file << "JIT_sof_pip;" << size <<";" << epsilon << ";"  ;
 	for( auto i = 0 ; i < LEN_VALUES ; i++)
 	{
@@ -69,20 +72,23 @@ void sft_pip(int size,int epsilon)
     PAPI_start(EventSet);
     for(int j = 0 ; j <30000;j++)
     {
-        for (int i = 0 ; i <size - 4; i ++)
+        for (int i = 0 ; i <size - 4; i+=4)
         {
-            b[i] = a[i] *2 +3;
+            b[i] = a[i] *2 + 4;
+            a[i]++;
             if(epsilon > 4)
             {
-               b[i+1] = a[i +1] * 3 - 2; 
+               b[i+1] = a[i +1] * 3 - 2;
+               a[i+1]++; 
                if(epsilon > 5)
                {
-               b[i+2] = a[i +2] * 3 - 2;  
+               b[i+2] = a[i +2] * 3 - 2; 
+               a[i+2]++;
                if(epsilon >  6)
                {
                b[i+3] = a[i +3] * 3 - 2;
-               a[i] ++;
-               
+               a[i+3]++;
+	       
                }
                }
             }
@@ -91,8 +97,8 @@ void sft_pip(int size,int epsilon)
     }
     PAPI_stop(EventSet,values);
     printf("NOJIT TOT_CYC : %lld L1_DCM : %lld  TOT_INS : %lld \n", values[0], values[1], values[2]);
-    std::ofstream csv_file("software_pipeling.csv",std::ios::app);
-	csv_file << "JIT_sof_pip;" << size <<";" << epsilon << ";"  ;
+    std::ofstream csv_file("software_pipelining.csv",std::ios::app);
+	csv_file << "NOJIT_sof_pip;" << size <<";" << epsilon << ";"  ;
 	for( auto i = 0 ; i < LEN_VALUES ; i++)
 	{
 		csv_file << values[i] << ";"; 
