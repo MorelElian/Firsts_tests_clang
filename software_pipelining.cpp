@@ -43,6 +43,13 @@ template<int size,int epsilon>
     }
     PAPI_stop(EventSet,values);
     printf("JIT TOT_CYC : %lld L1_DCM : %lld  TOT_INS : %lld \n", values[0], values[1], values[2]);
+    std::ofstream csv_file("software_pipeling.csv",std::ios::app);
+	csv_file << "JIT_sof_pip;" << size <<";" << epsilon << ";"  ;
+	for( auto i = 0 ; i < LEN_VALUES ; i++)
+	{
+		csv_file << values[i] << ";"; 
+	}
+	csv_file << "\n";
 }
 template<typename t>
 void sft_pip(int size,int epsilon)
@@ -84,6 +91,13 @@ void sft_pip(int size,int epsilon)
     }
     PAPI_stop(EventSet,values);
     printf("NOJIT TOT_CYC : %lld L1_DCM : %lld  TOT_INS : %lld \n", values[0], values[1], values[2]);
+    std::ofstream csv_file("software_pipeling.csv",std::ios::app);
+	csv_file << "JIT_sof_pip;" << size <<";" << epsilon << ";"  ;
+	for( auto i = 0 ; i < LEN_VALUES ; i++)
+	{
+		csv_file << values[i] << ";"; 
+	}
+	csv_file << "\n";
 }
 int main(int argc, char * argv[])
 {
