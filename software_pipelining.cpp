@@ -9,6 +9,14 @@ template<int size,int epsilon>
     {
         a[i] = i+4 -size/2;
     }
+    long long values[3];
+    int retval,EventSet = PAPI_NULL;
+    retval = PAPI_library_init(PAPI_VER_CURRENT);
+    retval = PAPI_create_eventset(&EventSet);
+    PAPI_add_event(EventSet,PAPI_TOT_CYC);
+    PAPI_add_event(EventSet,PAPI_L1_DCM);
+    PAPI_add_event(EventSet,PAPI_TOT_INS);
+    PAPI_start(EventSet);
     for(int j = 0 ; j <30000;j++)
     {
         for (int i = 0 ; i <size - 4; i ++)
@@ -31,6 +39,8 @@ template<int size,int epsilon>
 
         }
     }
+    PAPI_stop(EventSet,values);
+    printf("JIT TOT_CYC : %lld L1_DCM : %lld  TOT_INS : %lld", values[0], values[1], values[2]);
 }
 template<typename t>
 sft_pip(int size,int epsilon)
@@ -40,6 +50,14 @@ sft_pip(int size,int epsilon)
     {
         a[i] = i+4 -size/2;
     }
+    long long values[3];
+    int retval,EventSet = PAPI_NULL;
+    retval = PAPI_library_init(PAPI_VER_CURRENT);
+    retval = PAPI_create_eventset(&EventSet);
+    PAPI_add_event(EventSet,PAPI_TOT_CYC);
+    PAPI_add_event(EventSet,PAPI_L1_DCM);
+    PAPI_add_event(EventSet,PAPI_TOT_INS);
+    PAPI_start(EventSet);
     for(int j = 0 ; j <30000;j++)
     {
         for (int i = 0 ; i <size - 4; i ++)
@@ -62,6 +80,8 @@ sft_pip(int size,int epsilon)
 
         }
     }
+    PAPI_stop(EventSet,values);
+    printf("JIT TOT_CYC : %lld L1_DCM : %lld  TOT_INS : %lld", values[0], values[1], values[2]);
 }
 int main(int argc, char * argv[])
 {
